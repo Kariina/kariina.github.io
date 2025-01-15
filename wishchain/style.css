@@ -15,10 +15,12 @@
         background-color: #24c4ff;
         color: white;
         padding: 5px 20px;
-        margin: 0px 0;
+        margin: 0;
         border: none;
         cursor: pointer;
-        width: 40%;
+        width: 100%;  /* Make both buttons take equal width */
+        min-width: 120px; /* Ensure minimum width */
+        white-space: nowrap; /* Prevent text from wrapping */
     }
 
     button:hover {
@@ -46,6 +48,10 @@
 
     .button-container {
         text-align: center;
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 0 10px;
     }
 
     .container {
@@ -87,7 +93,8 @@
     .modal-content {
         background-color: transparent;
         margin: 15% auto;
-        width: 20%;
+        width: 20%;  /* Slightly wider than 20% to accommodate buttons better */
+        min-width: 300px; /* Ensure minimum width on smaller screens */
         height: 8%;
     }
 
