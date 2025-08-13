@@ -1,13 +1,23 @@
 <!DOCTYPE html>
 <html>
 	<head>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 		<title>Wish Chain</title>
 		<link rel="stylesheet" type="text/css" href="style.css">
 		<link rel="shortcut icon" href="favicon.ico" />
 		<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 		<meta http-equiv="Pragma" content="no-cache" />
 		<meta http-equiv="Expires" content="0" />
+		<style>
+			/* Add touch-friendly styles */
+			canvas {
+				touch-action: manipulation;
+				-webkit-user-select: none;
+				-moz-user-select: none;
+				-ms-user-select: none;
+				user-select: none;
+			}
+		</style>
 	</head>
 	<body>
         <div id="id01" class="modal">
@@ -44,13 +54,14 @@
 
 	<script src="js/three.min.js"></script>
 	<script src = "js/jquery-3.3.1.min.js"></script>
-	<script src="js/threex.domevents.js"></script>
     <script src = "js/bootstrap.min.js"></script>
 
 	<script>
 	var scene, camera, renderer, controls;
 	var seed;
 	var loader = new THREE.TextureLoader();
+	var raycaster = new THREE.Raycaster();
+	var mouse = new THREE.Vector2();
 
 	$('#id04').modal('show');
 	init();
@@ -66,11 +77,17 @@
 		renderer = new THREE.WebGLRenderer();
 
 		renderer.setSize( window.innerWidth, window.innerHeight );
+		renderer.domElement.style.touchAction = 'manipulation';
 		document.body.appendChild( renderer.domElement );
 
 		var light = new THREE.AmbientLight(0xffffff);
 		light.position.set(0, 0, 10);
 		scene.add(light);
+		
+		// Add event listeners for both mouse and touch
+		renderer.domElement.addEventListener('click', onPointerDown, false);
+		renderer.domElement.addEventListener('touchend', onPointerDown, false);
+		window.addEventListener('resize', onWindowResize, false);
 	}
 
 	var seedimg = loader.load("seed.png");
@@ -98,6 +115,58 @@
 			currentY: 0
 		};
 		seeds.push(seed);
+	}
+
+	function onPointerDown(event) {
+		// Prevent default to avoid double-firing on touch devices
+		event.preventDefault();
+		
+		// Handle both mouse and touch events
+		var clientX, clientY;
+		if (event.touches && event.touches.length > 0) {
+			// Touch event
+			clientX = event.touches[0].clientX;
+			clientY = event.touches[0].clientY;
+		} else if (event.changedTouches && event.changedTouches.length > 0) {
+			// Touch end event
+			clientX = event.changedTouches[0].clientX;
+			clientY = event.changedTouches[0].clientY;
+		} else {
+			// Mouse event
+			clientX = event.clientX;
+			clientY = event.clientY;
+		}
+		
+		// Calculate mouse position in normalized device coordinates
+		mouse.x = (clientX / window.innerWidth) * 2 - 1;
+		mouse.y = -(clientY / window.innerHeight) * 2 + 1;
+
+		// Update the picking ray with the camera and mouse position
+		raycaster.setFromCamera(mouse, camera);
+
+		// Get all seed meshes
+		var seedMeshes = seeds.map(function(seed) { return seed.mesh; });
+		
+		// Calculate objects intersecting the picking ray
+		var intersects = raycaster.intersectObjects(seedMeshes);
+
+		if (intersects.length > 0) {
+			// Find which seed was clicked
+			var clickedMesh = intersects[0].object;
+			var seedIndex = -1;
+			
+			for (var i = 0; i < seeds.length; i++) {
+				if (seeds[i].mesh === clickedMesh) {
+					seedIndex = i;
+					break;
+				}
+			}
+			
+			if (seedIndex !== -1) {
+				seeds[seedIndex].clicked = true;
+				$('#id01').modal('show');
+			}
+		}
 	}
 
 	function step(timestamp){
@@ -199,93 +268,6 @@
 			.catch(error => console.error('Error!', error.message));
 		document.getElementById("wishForm").value = "";
 	});
-
-	var domEvents = new THREEx.DomEvents(camera, renderer.domElement);
-	//the following doesn't work when done in a for loop because when a seed is clicked the computer no longer knows the value of its index
-	domEvents.addEventListener(seeds[0].mesh, 'click', function(event){
-	        seeds[0].clicked = true;
-	        $('#id01').modal('show');
-	}, false);
-	domEvents.addEventListener(seeds[1].mesh, 'click', function(event){
-	        seeds[1].clicked = true;
-	        $('#id01').modal('show');
-	}, false);
-	domEvents.addEventListener(seeds[2].mesh, 'click', function(event){
-	        seeds[2].clicked = true;
-	        $('#id01').modal('show');
-	}, false);
-	domEvents.addEventListener(seeds[3].mesh, 'click', function(event){
-	        seeds[3].clicked = true;
-	        $('#id01').modal('show');
-	}, false);
-	domEvents.addEventListener(seeds[4].mesh, 'click', function(event){
-	        seeds[4].clicked = true;
-	        $('#id01').modal('show');
-	}, false);
-	domEvents.addEventListener(seeds[5].mesh, 'click', function(event){
-	        seeds[5].clicked = true;
-	        $('#id01').modal('show');
-	}, false);
-	domEvents.addEventListener(seeds[6].mesh, 'click', function(event){
-	        seeds[6].clicked = true;
-	        $('#id01').modal('show');
-	}, false);
-	domEvents.addEventListener(seeds[7].mesh, 'click', function(event){
-	        seeds[7].clicked = true;
-	        $('#id01').modal('show');
-	}, false);
-	domEvents.addEventListener(seeds[8].mesh, 'click', function(event){
-	        seeds[8].clicked = true;
-	        $('#id01').modal('show');
-	}, false);
-	domEvents.addEventListener(seeds[9].mesh, 'click', function(event){
-	        seeds[9].clicked = true;
-	        $('#id01').modal('show');
-	}, false);
-	domEvents.addEventListener(seeds[10].mesh, 'click', function(event){
-	        seeds[10].clicked = true;
-	        $('#id01').modal('show');
-	}, false);
-	domEvents.addEventListener(seeds[10].mesh, 'click', function(event){
-	        seeds[10].clicked = true;
-	        $('#id01').modal('show');
-	}, false);
-	domEvents.addEventListener(seeds[11].mesh, 'click', function(event){
-	        seeds[11].clicked = true;
-	        $('#id01').modal('show');
-	}, false);
-	domEvents.addEventListener(seeds[12].mesh, 'click', function(event){
-	        seeds[12].clicked = true;
-	        $('#id01').modal('show');
-	}, false);
-	domEvents.addEventListener(seeds[13].mesh, 'click', function(event){
-	        seeds[13].clicked = true;
-	        $('#id01').modal('show');
-	}, false);
-	domEvents.addEventListener(seeds[14].mesh, 'click', function(event){
-	        seeds[14].clicked = true;
-	        $('#id01').modal('show');
-	}, false);
-	domEvents.addEventListener(seeds[15].mesh, 'click', function(event){
-	        seeds[15].clicked = true;
-	        $('#id01').modal('show');
-	}, false);
-	domEvents.addEventListener(seeds[16].mesh, 'click', function(event){
-	        seeds[16].clicked = true;
-	        $('#id01').modal('show');
-	}, false);
-	domEvents.addEventListener(seeds[17].mesh, 'click', function(event){
-	        seeds[17].clicked = true;
-	        $('#id01').modal('show');
-	}, false);
-	domEvents.addEventListener(seeds[18].mesh, 'click', function(event){
-	        seeds[18].clicked = true;
-	        $('#id01').modal('show');
-	}, false);
-	domEvents.addEventListener(seeds[19].mesh, 'click', function(event){
-	        seeds[19].clicked = true;
-	        $('#id01').modal('show');
-	}, false);
 
 	</script>
 	</body>

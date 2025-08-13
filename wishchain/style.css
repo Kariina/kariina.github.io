@@ -93,7 +93,7 @@
     .modal-content {
         background-color: transparent;
         margin: 15% auto;
-        width: 20%;  /* Slightly wider than 20% to accommodate buttons better */
+        width: 20%;  
         min-width: 300px; /* Ensure minimum width on smaller screens */
         height: 8%;
     }
